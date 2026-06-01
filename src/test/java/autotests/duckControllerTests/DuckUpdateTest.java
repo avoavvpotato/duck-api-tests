@@ -1,4 +1,4 @@
-package autotests.management;
+package autotests.duckControllerTests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -52,7 +52,17 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
         );
     }
 
-    public void extractDuckId(TestCaseRunner runner) {
+    public void deleteDuck(TestCaseRunner runner, String id) {
+        runner.$(
+                http()
+                        .client("http://localhost:2222")
+                        .send()
+                        .delete("/api/duck/delete")
+                        .queryParam("id", id)
+        );
+    }
+
+    public void getDuckId(TestCaseRunner runner) {
         runner.$(
                 http()
                         .client("http://localhost:2222")
@@ -89,7 +99,7 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
     @CitrusTest
     public void updateColorAndHeight(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
-        extractDuckId(runner);
+        getDuckId(runner);
 
         updateDuck(runner, "${duckId}", "red", 0.02, "rubber", "quack", "ACTIVE");
 
@@ -97,13 +107,15 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
                 runner,
                 jsonPath().expression("$.message", "Duck with id = ${duckId} is updated")
         );
+
+        deleteDuck(runner, "${duckId}");
     }
 
     @Test(description = "Проверка изменения цвета и звука утки")
     @CitrusTest
     public void updateColorAndSound(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
-        extractDuckId(runner);
+        getDuckId(runner);
 
         updateDuck(runner, "${duckId}", "white", 0.01, "rubber", "xru-xru", "ACTIVE");
 
@@ -111,5 +123,7 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
                 runner,
                 jsonPath().expression("$.message", "Duck with id = ${duckId} is updated")
         );
+
+        deleteDuck(runner, "${duckId}");
     }
 }

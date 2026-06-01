@@ -1,4 +1,4 @@
-package autotests.management;
+package autotests.duckControllerTests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -15,9 +15,13 @@ import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckDeleteTest extends TestNGCitrusSpringSupport {
-    public void validateResponseJsonPath(TestCaseRunner runner,
-                                         JsonPathSupport body) {
+public class DuckCreateTest extends TestNGCitrusSpringSupport {
+    public void validateResponse(TestCaseRunner runner,
+                                 String color,
+                                 double height,
+                                 String material,
+                                 String sound,
+                                 String wingsState) {
         runner.$(
                 http()
                         .client("http://localhost:2222")
@@ -25,7 +29,15 @@ public class DuckDeleteTest extends TestNGCitrusSpringSupport {
                         .response(HttpStatus.OK)
                         .message()
                         .type(MessageType.JSON)
-                        .validate(body)
+                        .validate(
+                                jsonPath()
+                                        .expression("$.color", color)
+                                        .expression("$.height", String.valueOf(height))
+                                        .expression("$.material", material)
+                                        .expression("$.sound", sound)
+                                        .expression("$.wingsState", wingsState)
+                        )
+                        .extract(fromBody().expression("$.id", "duckId"))
         );
     }
 
@@ -52,16 +64,22 @@ public class DuckDeleteTest extends TestNGCitrusSpringSupport {
         );
     }
 
-    public void extractDuckId(TestCaseRunner runner) {
-        runner.$(
-                http()
-                        .client("http://localhost:2222")
-                        .receive()
-                        .response(HttpStatus.OK)
-                        .message()
-                        .type(MessageType.JSON)
-                        .extract(fromBody().expression("$.id", "duckId"))
-        );
+    @Test(description = "Проверка создания уточки с material = rubber")
+    @CitrusTest
+    public void createRubberMaterial(@Optional @CitrusResource TestCaseRunner runner) {
+        createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
+
+        validateResponse(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
+        deleteDuck(runner, "${duckId}");
+    }
+
+    @Test(description = "Проверка создания уточки с material = wood")
+    @CitrusTest
+    public void createWoodMaterial(@Optional @CitrusResource TestCaseRunner runner) {
+        createDuck(runner, "yellow", 0.01, "wood", "quack", "ACTIVE");
+
+        validateResponse(runner, "yellow", 0.01, "wood", "quack", "ACTIVE");
+        deleteDuck(runner, "${duckId}");
     }
 
     public void deleteDuck(TestCaseRunner runner, String id) {
@@ -71,20 +89,6 @@ public class DuckDeleteTest extends TestNGCitrusSpringSupport {
                         .send()
                         .delete("/api/duck/delete")
                         .queryParam("id", id)
-        );
-    }
-
-    @Test(description = "Проверка что уточка удаляется")
-    @CitrusTest
-    public void deleteDuckTest(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
-        extractDuckId(runner);
-
-        deleteDuck(runner, "${duckId}");
-
-        validateResponseJsonPath(
-                runner,
-                jsonPath().expression("$.message", "Duck is deleted")
         );
     }
 }

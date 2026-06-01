@@ -1,4 +1,4 @@
-package autotests.actions;
+package autotests.duckActionControllerTests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -15,7 +15,7 @@ import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckFlyTest extends TestNGCitrusSpringSupport {
+public class DuckSwimTest extends TestNGCitrusSpringSupport {
     public void validateResponseJsonPath(TestCaseRunner runner,
                                          JsonPathSupport body) {
         runner.$(
@@ -29,61 +29,75 @@ public class DuckFlyTest extends TestNGCitrusSpringSupport {
         );
     }
 
-    public void duckFly(TestCaseRunner runner, String id) {
+    public void duckSwim(TestCaseRunner runner, String id) {
         runner.$(
                 http()
                         .client("http://localhost:2222")
                         .send()
-                        .get("/api/duck/action/fly")
-                        .queryParam("id", id)
-        );
+                        .get("/api/duck/action/swim")
+                        .queryParam("id", id));
     }
 
-    @Test(description = "Проверка того что уточка полетела если крылья ACTIVE")
+    @Test(description = "Проверка того, что уточка поплыла")
     @CitrusTest
-    public void successfulFly(@Optional @CitrusResource TestCaseRunner runner) {
+    public void successfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
-        extractDuckId(runner);
+        getDuckId(runner);
 
-        duckFly(runner, "${duckId}");
+        duckSwim(runner, "${duckId}");
 
-        validateResponseJsonPath(
-                runner,
-                // TODO: По документации ожидается "I’m flying".
-                // jsonPath().expression("$.message", "I’m flying")
-                jsonPath().expression("$.message", "I am flying :)")
+        // TODO: По документации ожидается статус 200 OK и message = "I’m swimming".
+        // jsonPath().expression("$.message", "I’m swimming")
+        runner.$(
+                http()
+                        .client("http://localhost:2222")
+                        .receive()
+                        .response(HttpStatus.NOT_FOUND)
+                        .message()
+                        .type(MessageType.JSON)
+                        .validate(
+                                jsonPath().expression("$.message", "Paws are not found ((((")
+                        )
+        );
+
+        deleteDuck(runner, "${duckId}");
+    }
+
+    public void getAllIds(TestCaseRunner runner) {
+        runner.$(
+                http()
+                        .client("http://localhost:2222")
+                        .send()
+                        .get("/api/duck/getAllIds")
         );
     }
 
-    @Test(description = "Проверка того что уточка не полетела если крылья FIXED")
+    @Test(description = "Проверка плавания для несуществующей утки")
     @CitrusTest
-    public void unsuccessfulFly(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.01, "rubber", "quack", "FIXED");
-        extractDuckId(runner);
+    public void swimNonExisting(@Optional @CitrusResource TestCaseRunner runner) {
+        String nonExistingDuckId = "9223372036854775807";
 
-        duckFly(runner, "${duckId}");
+        getAllIds(runner);
 
-        validateResponseJsonPath(
-                runner,
-                // TODO: По документации ожидается "I can’t fly".
-                // jsonPath().expression("$.message", "I can’t fly")
-                jsonPath().expression("$.message", "I can not fly :C")
+        runner.$(
+                http()
+                        .client("http://localhost:2222")
+                        .receive()
+                        .response(HttpStatus.OK)
+                        .message()
+                        .type(MessageType.JSON)
+                        .validate(
+                                jsonPath().expression("$[?(@ == " + nonExistingDuckId + ")]", "[]")
+                        )
         );
-    }
 
-    @Test(description = "Проверка того что уточка не полетела если крылья UNDEFINED")
-    @CitrusTest
-    public void undefinedFly(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.01, "rubber", "quack", "UNDEFINED");
-        extractDuckId(runner);
+        duckSwim(runner, nonExistingDuckId);
 
-        duckFly(runner, "${duckId}");
-
-        validateResponseJsonPath(
-                runner,
-                // TODO: По документации ожидается ??.
-                //jsonPath().expression("$.message", "Undefined")
-                jsonPath().expression("$.message", "Wings are not detected :(")
+        runner.$(
+                http()
+                        .client("http://localhost:2222")
+                        .receive()
+                        .response(HttpStatus.NOT_FOUND)
         );
     }
 
@@ -110,7 +124,7 @@ public class DuckFlyTest extends TestNGCitrusSpringSupport {
         );
     }
 
-    public void extractDuckId(TestCaseRunner runner) {
+    public void getDuckId(TestCaseRunner runner) {
         runner.$(
                 http()
                         .client("http://localhost:2222")
@@ -119,6 +133,16 @@ public class DuckFlyTest extends TestNGCitrusSpringSupport {
                         .message()
                         .type(MessageType.JSON)
                         .extract(fromBody().expression("$.id", "duckId"))
+        );
+    }
+
+    public void deleteDuck(TestCaseRunner runner, String id) {
+        runner.$(
+                http()
+                        .client("http://localhost:2222")
+                        .send()
+                        .delete("/api/duck/delete")
+                        .queryParam("id", id)
         );
     }
 }
