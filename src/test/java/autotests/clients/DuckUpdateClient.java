@@ -1,20 +1,17 @@
 package autotests.clients;
-import autotests.EndpointConfig;
+
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.dsl.JsonPathSupport;
 import com.consol.citrus.http.client.HttpClient;
 import com.consol.citrus.message.MessageType;
-import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-@ContextConfiguration(classes = {EndpointConfig.class})
-public class DuckUpdateClient extends TestNGCitrusSpringSupport {
+public class DuckUpdateClient extends DuckClient {
     @Autowired
     protected HttpClient duckService;
 
