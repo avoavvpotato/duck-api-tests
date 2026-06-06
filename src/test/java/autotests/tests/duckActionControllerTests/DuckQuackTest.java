@@ -1,6 +1,7 @@
 package autotests.tests.duckActionControllerTests;
 
 import autotests.clients.DuckQuackClient;
+import autotests.payloads.response.DuckSoundResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
@@ -21,12 +22,21 @@ public class DuckQuackTest extends DuckQuackClient {
     public void quackWithOddId(@Optional @CitrusResource TestCaseRunner runner) {
         duckQuack(runner, "10003", "3", "2");
 
-        validateResponseJsonPath(
-                runner,
-                // TODO: По документации ожидается "quack-quack, quack-quack, quack-quack". rep - кол повторений quack sound
-                // jsonPath().expression("$.sound", "quack-quack, quack-quack, quack-quack")
-                jsonPath().expression("$.sound", "quack-quack-quack, quack-quack-quack")
-        );
+        //PAYLOAD
+        DuckSoundResponse expected = new DuckSoundResponse()
+                .sound("quack-quack-quack, quack-quack-quack");
+
+        validateResponsePayloadMessage(runner, expected);
+
+        //validateResponseJsonPath(
+        //      runner,
+        // TODO: По документации ожидается "quack-quack, quack-quack, quack-quack". rep - кол повторений quack sound
+        // jsonPath().expression("$.sound", "quack-quack, quack-quack, quack-quack")
+        //      jsonPath().expression("$.sound", "quack-quack-quack, quack-quack-quack")
+        //);
+
+        // RESOURCES
+        //validateResponseResourceMessage(runner, "duckQuackTest/quackOddResponse.json");
     }
 
     @Test(description = "Проверка кряканья уточки с корректным чётным id")
@@ -34,11 +44,20 @@ public class DuckQuackTest extends DuckQuackClient {
     public void quackWithEvenId(@Optional @CitrusResource TestCaseRunner runner) {
         duckQuack(runner, "10004", "3", "2");
 
-        validateResponseJsonPath(
-                runner,
-                // TODO: По документации ожидается "quack-quack, quack-quack, quack-quack".
-                // jsonPath().expression("$.sound", "quack-quack, quack-quack, quack-quack")
-                jsonPath().expression("$.sound", "moo-moo-moo, moo-moo-moo")
-        );
+        //PAYLOAD
+        DuckSoundResponse expected = new DuckSoundResponse()
+                .sound("moo-moo-moo, moo-moo-moo");
+
+        validateResponsePayloadMessage(runner, expected);
+
+        //validateResponseJsonPath(
+        //      runner,
+        // TODO: По документации ожидается "quack-quack, quack-quack, quack-quack".
+        // jsonPath().expression("$.sound", "quack-quack, quack-quack, quack-quack")
+        //    jsonPath().expression("$.sound", "moo-moo-moo, moo-moo-moo")
+        //);
+
+        //RESOURCES
+        //validateResponseResourceMessage(runner, "duckQuackTest/quackEvenResponse.json");
     }
 }
