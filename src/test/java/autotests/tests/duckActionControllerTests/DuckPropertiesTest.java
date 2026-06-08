@@ -1,46 +1,20 @@
-package autotests.duckActionControllerTests;
+package autotests.tests.duckActionControllerTests;
+
+import autotests.clients.DuckPropertiesClient;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.dsl.JsonPathSupport;
-import com.consol.citrus.message.MessageType;
-import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
-import org.springframework.http.HttpStatus;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
-import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
-public class DuckPropertiesTest extends TestNGCitrusSpringSupport {
+public class DuckPropertiesTest extends DuckPropertiesClient {
     //INSERT INTO duck (id, color, material, height, sound, wings_state)
     //VALUES
     //    (10001, 'yellow', 'rubber', 0.01, 'quack', 'ACTIVE'),
     //    (10002, 'yellow', 'wood', 0.01, 'quack', 'ACTIVE'),
-    public void validateResponseJsonPath(TestCaseRunner runner,
-                                         JsonPathSupport body) {
-        runner.$(
-                http()
-                        .client("http://localhost:2222")
-                        .receive()
-                        .response(HttpStatus.OK)
-                        .message()
-                        .type(MessageType.JSON)
-                        .validate(body)
-        );
-    }
-
-    public void duckProperties(TestCaseRunner runner, String id) {
-        runner.$(
-                http()
-                        .client("http://localhost:2222")
-                        .send()
-                        .get("/api/duck/action/properties")
-                        .queryParam("id", id)
-        );
-    }
-
     @Test(description = "Проверка получения свойств уточки с material = rubber и нечетным ID")
     @CitrusTest
     public void propertiesRubberDuck(@Optional @CitrusResource TestCaseRunner runner) {
@@ -75,14 +49,6 @@ public class DuckPropertiesTest extends TestNGCitrusSpringSupport {
         //.expression("$.wingsState", "ACTIVE")
         //);
 
-        runner.$(
-                http()
-                        .client("http://localhost:2222")
-                        .receive()
-                        .response(HttpStatus.OK)
-                        .message()
-                        .type(MessageType.JSON)
-                        .body("{}")
-        );
+        validateEmptyJsonResponse(runner);
     }
 }

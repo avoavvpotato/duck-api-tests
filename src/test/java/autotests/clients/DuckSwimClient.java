@@ -1,26 +1,20 @@
-package autotests.duckActionControllerTests;
+package autotests.clients;
 
 import com.consol.citrus.TestCaseRunner;
-import com.consol.citrus.annotations.CitrusResource;
-import com.consol.citrus.annotations.CitrusTest;
 import com.consol.citrus.dsl.JsonPathSupport;
 import com.consol.citrus.message.MessageType;
-import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Test;
 
-import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckSwimTest extends TestNGCitrusSpringSupport {
+public class DuckSwimClient extends DuckClient {
     public void validateResponseJsonPath(TestCaseRunner runner,
                                          JsonPathSupport body) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .receive()
                         .response(HttpStatus.OK)
                         .message()
@@ -32,72 +26,18 @@ public class DuckSwimTest extends TestNGCitrusSpringSupport {
     public void duckSwim(TestCaseRunner runner, String id) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .send()
                         .get("/api/duck/action/swim")
                         .queryParam("id", id));
     }
 
-    @Test(description = "Проверка того, что уточка поплыла")
-    @CitrusTest
-    public void successfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
-        getDuckId(runner);
-
-        duckSwim(runner, "${duckId}");
-
-        // TODO: По документации ожидается статус 200 OK и message = "I’m swimming".
-        // jsonPath().expression("$.message", "I’m swimming")
-        runner.$(
-                http()
-                        .client("http://localhost:2222")
-                        .receive()
-                        .response(HttpStatus.NOT_FOUND)
-                        .message()
-                        .type(MessageType.JSON)
-                        .validate(
-                                jsonPath().expression("$.message", "Paws are not found ((((")
-                        )
-        );
-
-        deleteDuck(runner, "${duckId}");
-    }
-
     public void getAllIds(TestCaseRunner runner) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .send()
                         .get("/api/duck/getAllIds")
-        );
-    }
-
-    @Test(description = "Проверка плавания для несуществующей утки")
-    @CitrusTest
-    public void swimNonExisting(@Optional @CitrusResource TestCaseRunner runner) {
-        String nonExistingDuckId = "9223372036854775807";
-
-        getAllIds(runner);
-
-        runner.$(
-                http()
-                        .client("http://localhost:2222")
-                        .receive()
-                        .response(HttpStatus.OK)
-                        .message()
-                        .type(MessageType.JSON)
-                        .validate(
-                                jsonPath().expression("$[?(@ == " + nonExistingDuckId + ")]", "[]")
-                        )
-        );
-
-        duckSwim(runner, nonExistingDuckId);
-
-        runner.$(
-                http()
-                        .client("http://localhost:2222")
-                        .receive()
-                        .response(HttpStatus.NOT_FOUND)
         );
     }
 
@@ -109,7 +49,7 @@ public class DuckSwimTest extends TestNGCitrusSpringSupport {
                            String wingsState) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .send()
                         .post("/api/duck/create")
                         .message()
@@ -127,7 +67,7 @@ public class DuckSwimTest extends TestNGCitrusSpringSupport {
     public void getDuckId(TestCaseRunner runner) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .receive()
                         .response(HttpStatus.OK)
                         .message()
@@ -139,10 +79,32 @@ public class DuckSwimTest extends TestNGCitrusSpringSupport {
     public void deleteDuck(TestCaseRunner runner, String id) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .send()
                         .delete("/api/duck/delete")
                         .queryParam("id", id)
+        );
+    }
+
+    public void validateNotFoundJsonPath(TestCaseRunner runner,
+                                         JsonPathSupport body) {
+        runner.$(
+                http()
+                        .client(duckService)
+                        .receive()
+                        .response(HttpStatus.NOT_FOUND)
+                        .message()
+                        .type(MessageType.JSON)
+                        .validate(body)
+        );
+    }
+
+    public void validateNotFound(TestCaseRunner runner) {
+        runner.$(
+                http()
+                        .client(duckService)
+                        .receive()
+                        .response(HttpStatus.NOT_FOUND)
         );
     }
 }

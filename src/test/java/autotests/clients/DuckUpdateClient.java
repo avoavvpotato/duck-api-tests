@@ -1,26 +1,25 @@
-package autotests.duckControllerTests;
+package autotests.clients;
 
 import com.consol.citrus.TestCaseRunner;
-import com.consol.citrus.annotations.CitrusResource;
-import com.consol.citrus.annotations.CitrusTest;
 import com.consol.citrus.dsl.JsonPathSupport;
+import com.consol.citrus.http.client.HttpClient;
 import com.consol.citrus.message.MessageType;
-import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Test;
 
-import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 import static com.consol.citrus.validation.DelegatingPayloadVariableExtractor.Builder.fromBody;
 
-public class DuckUpdateTest extends TestNGCitrusSpringSupport {
+public class DuckUpdateClient extends DuckClient {
+    @Autowired
+    protected HttpClient duckService;
+
     public void validateResponseJsonPath(TestCaseRunner runner,
                                          JsonPathSupport body) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .receive()
                         .response(HttpStatus.OK)
                         .message()
@@ -37,7 +36,7 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
                            String wingsState) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .send()
                         .post("/api/duck/create")
                         .message()
@@ -55,7 +54,7 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
     public void deleteDuck(TestCaseRunner runner, String id) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .send()
                         .delete("/api/duck/delete")
                         .queryParam("id", id)
@@ -65,7 +64,7 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
     public void getDuckId(TestCaseRunner runner) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .receive()
                         .response(HttpStatus.OK)
                         .message()
@@ -83,7 +82,7 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
                            String wingsState) {
         runner.$(
                 http()
-                        .client("http://localhost:2222")
+                        .client(duckService)
                         .send()
                         .put("/api/duck/update")
                         .queryParam("id", id)
@@ -93,37 +92,5 @@ public class DuckUpdateTest extends TestNGCitrusSpringSupport {
                         .queryParam("sound", sound)
                         .queryParam("wingsState", wingsState)
         );
-    }
-
-    @Test(description = "Проверка изменения цвета и высоты утки")
-    @CitrusTest
-    public void updateColorAndHeight(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
-        getDuckId(runner);
-
-        updateDuck(runner, "${duckId}", "red", 0.02, "rubber", "quack", "ACTIVE");
-
-        validateResponseJsonPath(
-                runner,
-                jsonPath().expression("$.message", "Duck with id = ${duckId} is updated")
-        );
-
-        deleteDuck(runner, "${duckId}");
-    }
-
-    @Test(description = "Проверка изменения цвета и звука утки")
-    @CitrusTest
-    public void updateColorAndSound(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
-        getDuckId(runner);
-
-        updateDuck(runner, "${duckId}", "white", 0.01, "rubber", "xru-xru", "ACTIVE");
-
-        validateResponseJsonPath(
-                runner,
-                jsonPath().expression("$.message", "Duck with id = ${duckId} is updated")
-        );
-
-        deleteDuck(runner, "${duckId}");
     }
 }
