@@ -6,25 +6,32 @@ import autotests.payloads.response.DuckMessageResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 
+@Epic("Тесты duck-action-controller")
+@Feature("Полёт уточки")
+@Story("Эндпоинт /api/duck/action/fly")
 public class DuckFlyTest extends DuckFlyClient {
 
     @Test(description = "Проверка того что уточка полетела если крылья ACTIVE")
     @CitrusTest
     public void successfulFly(@Optional @CitrusResource TestCaseRunner runner) {
-        DuckProperties request = new DuckProperties()
-                .color("yellow")
-                .height(0.01)
-                .material("rubber")
-                .sound("quack")
-                .wingsState("ACTIVE");
+        runner.variable("duckId", "100004");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
-        createDuck(runner, request);
-        getDuckId(runner);
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
+        validateDataInDatabase(runner, "${duckId}",
+                "yellow", "0.01", "rubber", "quack", "ACTIVE");
 
         duckFly(runner, "${duckId}");
 
@@ -43,22 +50,21 @@ public class DuckFlyTest extends DuckFlyClient {
 
         // RESOURCES
         // validateResponseResourceMessage(runner, "duckFlyTest/flyActiveResponse.json");
-
-        deleteDuck(runner, "${duckId}");
     }
 
     @Test(description = "Проверка того что уточка не полетела если крылья FIXED")
     @CitrusTest
     public void unsuccessfulFly(@Optional @CitrusResource TestCaseRunner runner) {
-        DuckProperties request = new DuckProperties()
-                .color("yellow")
-                .height(0.01)
-                .material("rubber")
-                .sound("quack")
-                .wingsState("FIXED");
+        runner.variable("duckId", "100005");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
-        createDuck(runner, request);
-        getDuckId(runner);
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'FIXED')");
+
+        validateDataInDatabase(runner, "${duckId}",
+                "yellow", "0.01", "rubber", "quack", "FIXED");
 
         //PAYLOAD
         duckFly(runner, "${duckId}");
@@ -77,22 +83,21 @@ public class DuckFlyTest extends DuckFlyClient {
         // validateResponseResourceMessage(runner, "duckFlyTest/flyFixedResponse.json");
 
         validateResponsePayloadMessage(runner, expected);
-
-        deleteDuck(runner, "${duckId}");
     }
 
     @Test(description = "Проверка того что уточка не полетела если крылья UNDEFINED")
     @CitrusTest
     public void undefinedFly(@Optional @CitrusResource TestCaseRunner runner) {
-        DuckProperties request = new DuckProperties()
-                .color("yellow")
-                .height(0.01)
-                .material("rubber")
-                .sound("quack")
-                .wingsState("UNDEFINED");
+        runner.variable("duckId", "100006");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
-        createDuck(runner, request);
-        getDuckId(runner);
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'UNDEFINED')");
+
+        validateDataInDatabase(runner, "${duckId}",
+                "yellow", "0.01", "rubber", "quack", "UNDEFINED");
 
         //PAYLOAD
         duckFly(runner, "${duckId}");
@@ -111,7 +116,5 @@ public class DuckFlyTest extends DuckFlyClient {
         // validateResponseResourceMessage(runner, "duckFlyTest/flyUndefinedResponse.json");
 
         validateResponsePayloadMessage(runner, expected);
-
-        deleteDuck(runner, "${duckId}");
     }
 }

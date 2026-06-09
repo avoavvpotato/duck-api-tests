@@ -6,24 +6,33 @@ import autotests.payloads.response.DuckMessageResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 
+@Epic("Тесты duck-action-controller")
+@Feature("Плавание уточки")
+@Story("Эндпоинт /api/duck/action/swim")
 public class DuckSwimTest extends DuckSwimClient {
     @Test(description = "Проверка того, что уточка поплыла")
     @CitrusTest
     public void successfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
-        DuckProperties request = new DuckProperties()
-                .color("yellow")
-                .height(0.01)
-                .material("rubber")
-                .sound("quack")
-                .wingsState("ACTIVE");
+        runner.variable("duckId", "100007");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
-        createDuck(runner, request);
-        getDuckId(runner);
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
+
+        validateDataInDatabase(runner, "${duckId}",
+                "yellow", "0.01", "rubber", "quack", "ACTIVE");
+
 
         duckSwim(runner, "${duckId}");
 
@@ -42,8 +51,6 @@ public class DuckSwimTest extends DuckSwimClient {
 
         //RESOURCES
         //validateNotFoundResource(runner, "duckSwimTest/swimNotFoundResponse.json");
-
-        deleteDuck(runner, "${duckId}");
     }
 
     @Test(description = "Проверка плавания для несуществующей уточки")

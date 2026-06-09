@@ -6,9 +6,15 @@ import autotests.payloads.response.DuckPropertiesResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+@Epic("Тесты duck-controller")
+@Feature("Создание уточки")
+@Story("Эндпоинт /api/duck/create")
 public class DuckCreateTest extends DuckCreateClient {
     @Test(description = "Проверка создания уточки с material = rubber")
     @CitrusTest
@@ -50,7 +56,9 @@ public class DuckCreateTest extends DuckCreateClient {
                         "  \"wingsState\": \"ACTIVE\"\n" +
                         "}");
 
-        deleteDuck(runner, "${duckId}");
+        validateDataInDatabase(runner, "${duckId}",
+                "yellow", "0.01", "rubber", "quack", "ACTIVE");
+        updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}");
     }
 
     @Test(description = "Проверка создания уточки с material = wood")
@@ -93,6 +101,8 @@ public class DuckCreateTest extends DuckCreateClient {
                         "  \"wingsState\": \"ACTIVE\"\n" +
                         "}");
 
-        deleteDuck(runner, "${duckId}");
+        validateDataInDatabase(runner, "${duckId}",
+                "yellow", "0.01", "wood", "quack", "ACTIVE");
+        updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}");
     }
 }
