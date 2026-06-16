@@ -6,24 +6,30 @@ import autotests.payloads.response.DuckMessageResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 
+@Epic("Тесты duck-controller")
+@Feature("Изменение уточки")
+@Story("Эндпоинт /api/duck/update")
 public class DuckUpdateTest extends DuckUpdateClient {
     @Test(description = "Проверка изменения цвета и высоты уточки")
     @CitrusTest
     public void updateColorAndHeight(@Optional @CitrusResource TestCaseRunner runner) {
-        DuckProperties request = new DuckProperties()
-                .color("yellow")
-                .height(0.01)
-                .material("rubber")
-                .sound("quack")
-                .wingsState("ACTIVE");
+        runner.variable("duckId", "100001");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
-        createDuck(runner, request);
-        getDuckId(runner);
+
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
 
         updateDuck(runner, "${duckId}", "red", 0.02, "rubber", "quack", "ACTIVE");
 
@@ -41,21 +47,20 @@ public class DuckUpdateTest extends DuckUpdateClient {
         // RESOURCES
         //validateResponseResourceMessage(runner, "duckUpdateTest/updateResponse.json");
 
-        deleteDuck(runner, "${duckId}");
+        validateDataInDatabase(runner, "${duckId}",
+                "red", "0.02", "rubber", "quack", "ACTIVE");
     }
 
     @Test(description = "Проверка изменения цвета и звука уточки")
     @CitrusTest
     public void updateColorAndSound(@Optional @CitrusResource TestCaseRunner runner) {
-        DuckProperties request = new DuckProperties()
-                .color("yellow")
-                .height(0.01)
-                .material("rubber")
-                .sound("quack")
-                .wingsState("ACTIVE");
+        runner.variable("duckId", "100002");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
-        createDuck(runner, request);
-        getDuckId(runner);
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
 
         updateDuck(runner, "${duckId}", "white", 0.01, "rubber", "xru-xru", "ACTIVE");
 
@@ -72,6 +77,7 @@ public class DuckUpdateTest extends DuckUpdateClient {
         // RESOURCES
         //validateResponseResourceMessage(runner, "duckUpdateTest/updateResponse.json");
 
-        deleteDuck(runner, "${duckId}");
+        validateDataInDatabase(runner, "${duckId}",
+                "white", "0.01", "rubber", "xru-xru", "ACTIVE");
     }
 }

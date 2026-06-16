@@ -6,11 +6,18 @@ import autotests.payloads.response.DuckPropertiesResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 
+@Epic("Тесты duck-action-controller")
+@Feature("Свойства уточки")
+@Story("Эндпоинт /api/duck/action/properties")
 public class DuckPropertiesTest extends DuckPropertiesClient {
     //INSERT INTO duck (id, color, material, height, sound, wings_state)
     //VALUES
@@ -19,7 +26,15 @@ public class DuckPropertiesTest extends DuckPropertiesClient {
     @Test(description = "Проверка получения свойств уточки с material = rubber и нечетным ID")
     @CitrusTest
     public void propertiesRubberDuck(@Optional @CitrusResource TestCaseRunner runner) {
-        duckProperties(runner, "10001");
+        runner.variable("duckId", "100011");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
+
+        duckProperties(runner, "${duckId}");
 
         DuckPropertiesResponse expected = new DuckPropertiesResponse()
                 .color("yellow")
@@ -50,7 +65,15 @@ public class DuckPropertiesTest extends DuckPropertiesClient {
     @Test(description = "Проверка получения свойств уточки с material = wood и четным ID")
     @CitrusTest
     public void propertiesWoodDuck(@Optional @CitrusResource TestCaseRunner runner) {
-        duckProperties(runner, "10002");
+        runner.variable("duckId", "100012");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'wood', 'quack', 'ACTIVE')");
+
+        duckProperties(runner, "${duckId}");
 
         //validateResponseJsonPath(
         //runner,

@@ -5,11 +5,18 @@ import autotests.payloads.response.DuckSoundResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 
+@Epic("Тесты duck-action-controller")
+@Feature("Кряканье уточки")
+@Story("Эндпоинт /api/duck/action/quack")
 public class DuckQuackTest extends DuckQuackClient {
 
     // INSERT INTO duck (id, color, material, height, sound, wings_state)
@@ -20,7 +27,15 @@ public class DuckQuackTest extends DuckQuackClient {
     @Test(description = "Проверка кряканья уточки с корректным нечётным id")
     @CitrusTest
     public void quackWithOddId(@Optional @CitrusResource TestCaseRunner runner) {
-        duckQuack(runner, "10003", "3", "2");
+        runner.variable("duckId", "100009");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
+
+        duckQuack(runner, "${duckId}", "3", "2");
 
         //PAYLOAD
         DuckSoundResponse expected = new DuckSoundResponse()
@@ -42,7 +57,15 @@ public class DuckQuackTest extends DuckQuackClient {
     @Test(description = "Проверка кряканья уточки с корректным чётным id")
     @CitrusTest
     public void quackWithEvenId(@Optional @CitrusResource TestCaseRunner runner) {
-        duckQuack(runner, "10004", "3", "2");
+        runner.variable("duckId", "100010");
+        runner.$(doFinally().actions(context ->
+                updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+
+        updateDatabase(runner,
+                "insert into DUCK (id, color, height, material, sound, wings_state) " +
+                        "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
+
+        duckQuack(runner, "${duckId}", "3", "2");
 
         //PAYLOAD
         DuckSoundResponse expected = new DuckSoundResponse()
