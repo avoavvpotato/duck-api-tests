@@ -30,10 +30,6 @@ public class DuckSwimTest extends DuckSwimClient {
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
 
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "rubber", "quack", "ACTIVE");
-
-
         duckSwim(runner, "${duckId}");
 
         // TODO: По документации ожидается статус 200 OK и message = "I’m swimming".

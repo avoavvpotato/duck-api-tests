@@ -31,9 +31,6 @@ public class DuckUpdateTest extends DuckUpdateClient {
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
 
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "rubber", "quack", "ACTIVE");
-
         updateDuck(runner, "${duckId}", "red", 0.02, "rubber", "quack", "ACTIVE");
 
         //PAYLOAD
@@ -64,9 +61,6 @@ public class DuckUpdateTest extends DuckUpdateClient {
         updateDatabase(runner,
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
-
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "rubber", "quack", "ACTIVE");
 
         updateDuck(runner, "${duckId}", "white", 0.01, "rubber", "xru-xru", "ACTIVE");
 

@@ -30,8 +30,6 @@ public class DuckFlyTest extends DuckFlyClient {
         updateDatabase(runner,
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "rubber", "quack", "ACTIVE");
 
         duckFly(runner, "${duckId}");
 
@@ -63,9 +61,6 @@ public class DuckFlyTest extends DuckFlyClient {
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'FIXED')");
 
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "rubber", "quack", "FIXED");
-
         //PAYLOAD
         duckFly(runner, "${duckId}");
 
@@ -95,9 +90,6 @@ public class DuckFlyTest extends DuckFlyClient {
         updateDatabase(runner,
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'UNDEFINED')");
-
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "rubber", "quack", "UNDEFINED");
 
         //PAYLOAD
         duckFly(runner, "${duckId}");

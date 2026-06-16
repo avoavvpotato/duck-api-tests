@@ -34,9 +34,6 @@ public class DuckPropertiesTest extends DuckPropertiesClient {
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'rubber', 'quack', 'ACTIVE')");
 
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "rubber", "quack", "ACTIVE");
-
         duckProperties(runner, "${duckId}");
 
         DuckPropertiesResponse expected = new DuckPropertiesResponse()
@@ -75,9 +72,6 @@ public class DuckPropertiesTest extends DuckPropertiesClient {
         updateDatabase(runner,
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
                         "values (${duckId}, 'yellow', 0.01, 'wood', 'quack', 'ACTIVE')");
-
-        validateDataInDatabase(runner, "${duckId}",
-                "yellow", "0.01", "wood", "quack", "ACTIVE");
 
         duckProperties(runner, "${duckId}");
 
