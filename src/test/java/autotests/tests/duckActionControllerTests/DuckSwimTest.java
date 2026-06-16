@@ -1,6 +1,8 @@
 package autotests.tests.duckActionControllerTests;
 
 import autotests.clients.DuckSwimClient;
+import autotests.payloads.request.DuckProperties;
+import autotests.payloads.response.DuckMessageResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
@@ -13,17 +15,33 @@ public class DuckSwimTest extends DuckSwimClient {
     @Test(description = "Проверка того, что уточка поплыла")
     @CitrusTest
     public void successfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 0.01, "rubber", "quack", "ACTIVE");
+        DuckProperties request = new DuckProperties()
+                .color("yellow")
+                .height(0.01)
+                .material("rubber")
+                .sound("quack")
+                .wingsState("ACTIVE");
+
+        createDuck(runner, request);
         getDuckId(runner);
 
         duckSwim(runner, "${duckId}");
 
         // TODO: По документации ожидается статус 200 OK и message = "I’m swimming".
         // jsonPath().expression("$.message", "I’m swimming")
-        validateNotFoundJsonPath(
-                runner,
-                jsonPath().expression("$.message", "Paws are not found ((((")
-        );
+        // validateNotFoundJsonPath(
+        //        runner,
+        //        jsonPath().expression("$.message", "Paws are not found ((((")
+        //);
+
+        //PAYLOAD
+        DuckMessageResponse expected = new DuckMessageResponse()
+                .message("Paws are not found ((((");
+
+        validateNotFoundPayloadMessage(runner, expected);
+
+        //RESOURCES
+        //validateNotFoundResource(runner, "duckSwimTest/swimNotFoundResponse.json");
 
         deleteDuck(runner, "${duckId}");
     }

@@ -2,6 +2,7 @@ package autotests.tests.duckActionControllerTests;
 
 import autotests.clients.DuckPropertiesClient;
 
+import autotests.payloads.response.DuckPropertiesResponse;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
@@ -20,17 +21,30 @@ public class DuckPropertiesTest extends DuckPropertiesClient {
     public void propertiesRubberDuck(@Optional @CitrusResource TestCaseRunner runner) {
         duckProperties(runner, "10001");
 
-        validateResponseJsonPath(
-                runner,
-                jsonPath()
-                        .expression("$.color", "yellow")
-                        // TODO: По документации ожидается height = "0.01".
-                        //.expression("$.height", "0.01")
-                        .expression("$.height", "1.0")
-                        .expression("$.material", "rubber")
-                        .expression("$.sound", "quack")
-                        .expression("$.wingsState", "ACTIVE")
-        );
+        DuckPropertiesResponse expected = new DuckPropertiesResponse()
+                .color("yellow")
+                .height(1.0)
+                .material("rubber")
+                .sound("quack")
+                .wingsState("ACTIVE");
+
+        //PAYLOAD
+        validateResponsePayloadMessage(runner, expected);
+
+        //validateResponseJsonPath(
+        //runner,
+        //jsonPath()
+        //.expression("$.color", "yellow")
+        // TODO: По документации ожидается height = "0.01".
+        //.expression("$.height", "0.01")
+        //.expression("$.height", "1.0")
+        //.expression("$.material", "rubber")
+        //.expression("$.sound", "quack")
+        //.expression("$.wingsState", "ACTIVE")
+        //);
+
+        //RESOURCES
+        //validateResponseResourceMessage(runner, "duckPropertiesTest/rubberPropertiesResponse.json");
     }
 
     @Test(description = "Проверка получения свойств уточки с material = wood и четным ID")
@@ -49,6 +63,10 @@ public class DuckPropertiesTest extends DuckPropertiesClient {
         //.expression("$.wingsState", "ACTIVE")
         //);
 
+        //PAYLOAD
         validateEmptyJsonResponse(runner);
+
+        // RESOURCES
+        // validateResponseResourceMessage(runner, "duckPropertiesTest/emptyResponse.json");
     }
 }
