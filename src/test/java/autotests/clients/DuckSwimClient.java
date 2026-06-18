@@ -15,12 +15,12 @@ import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 public class DuckSwimClient extends DuckClient {
     @Step("Эндпоинт для плавания уточки")
     public void duckSwim(TestCaseRunner runner, String id) {
-        sendGetRequest(runner, duckService, "/api/duck/action/swim", "id", id);
+        sendGetRequestWithQueryParameter(runner, duckService, "/api/duck/action/swim", "id", id);
     }
 
     @Step("Эндпоинт для получения всех id уточек")
     public void getAllIds(TestCaseRunner runner) {
-        sendGetMethod(runner, "/api/duck/getAllIds", duckService);
+        sendGetRequest(runner, "/api/duck/getAllIds", duckService);
     }
 
     @Step("Валидация ответа 404 из Resources")

@@ -5,15 +5,8 @@ import io.qameta.allure.Step;
 import org.springframework.context.annotation.Description;
 
 public class DuckCreateClient extends DuckClient {
-    //Payload
-    @Step("Валидация ответа create через Payload")
-    public void validateResponsePayload(TestCaseRunner runner, Object expectedPayload) {
-        validateResponsePayloadWithId(runner, duckService, expectedPayload, "duckId");
-    }
-
-    //String
-    @Step("Валидация ответа create через строку")
-    public void validateResponseString(TestCaseRunner runner, String expectedBody) {
-        validateResponseStringWithId(runner, duckService, expectedBody, "duckId");
+    @Step("Эндпоинт для внесения уточки в базу")
+    public void createDuck(TestCaseRunner runner, Object userData) {
+        sendPostRequestWithJsonBody(runner, "/api/duck/create", userData, duckService);
     }
 }

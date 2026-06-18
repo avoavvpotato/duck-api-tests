@@ -14,17 +14,12 @@ public class DuckUpdateClient extends DuckClient {
                            String material,
                            String sound,
                            String wingsState) {
-        runner.$(
-                http()
-                        .client(duckService)
-                        .send()
-                        .put("/api/duck/update")
-                        .queryParam("id", id)
-                        .queryParam("color", color)
-                        .queryParam("height", String.valueOf(height))
-                        .queryParam("material", material)
-                        .queryParam("sound", sound)
-                        .queryParam("wingsState", wingsState)
-        );
+        sendPutRequestWithQueryParameters(runner, duckService, "/api/duck/update",
+                "id", id,
+                "color", color,
+                "height", String.valueOf(height),
+                "material", material,
+                "sound", sound,
+                "wingsState", wingsState);
     }
 }

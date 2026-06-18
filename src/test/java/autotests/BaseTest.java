@@ -33,7 +33,7 @@ public class BaseTest extends TestNGCitrusSpringSupport {
     }
 
     @Step("GET запрос")
-    protected void sendGetMethod(TestCaseRunner runner, String path, HttpClient httpClient) {
+    protected void sendGetRequest(TestCaseRunner runner, String path, HttpClient httpClient) {
         runner.$(http()
                 .client(httpClient)
                 .send()
@@ -43,7 +43,7 @@ public class BaseTest extends TestNGCitrusSpringSupport {
     }
 
     @Step("GET запрос с query параметром")
-    protected void sendGetRequest(TestCaseRunner runner, HttpClient httpClient,
+    protected void sendGetRequestWithQueryParameter(TestCaseRunner runner, HttpClient httpClient,
                                   String path, String queryName, String queryValue) {
         runner.$(http()
                 .client(httpClient)
@@ -53,7 +53,7 @@ public class BaseTest extends TestNGCitrusSpringSupport {
     }
 
     @Step("POST запрос с JSON телом")
-    protected void sendPostMethod(TestCaseRunner runner, String path, Object body, HttpClient httpClient) {
+    protected void sendPostRequestWithJsonBody(TestCaseRunner runner, String path, Object body, HttpClient httpClient) {
         runner.$(http()
                 .client(httpClient)
                 .send()
@@ -65,7 +65,7 @@ public class BaseTest extends TestNGCitrusSpringSupport {
     }
 
     @Step("DELETE запрос с query параметром")
-    protected void sendDeleteRequest(TestCaseRunner runner, HttpClient httpClient,
+    protected void sendDeleteRequestWithQueryParameter(TestCaseRunner runner, HttpClient httpClient,
                                      String path, String queryName, String queryValue) {
         runner.$(http()
                 .client(httpClient)
@@ -135,6 +135,7 @@ public class BaseTest extends TestNGCitrusSpringSupport {
                 .body(expectedBody));
     }
 
+    @Step("Валидация ответа через Payload с сохранением id")
     protected void validateResponsePayloadWithId(TestCaseRunner runner, HttpClient httpClient,
                                                  Object expectedPayload, String variableName) {
         runner.$(http()
@@ -147,6 +148,7 @@ public class BaseTest extends TestNGCitrusSpringSupport {
                 .extract(fromBody().expression("$.id", variableName)));
     }
 
+    @Step("Валидация ответа строкой с сохранением id")
     protected void validateResponseStringWithId(TestCaseRunner runner, HttpClient httpClient,
                                                 String expectedBody, String variableName) {
         runner.$(http()
@@ -218,5 +220,18 @@ public class BaseTest extends TestNGCitrusSpringSupport {
                 .message()
                 .type(MessageType.JSON)
                 .extract(fromBody().expression(jsonPath, variableName)));
+    }
+
+    @Step("PUT запрос с query параметрами")
+    protected void sendPutRequestWithQueryParameters(TestCaseRunner runner, HttpClient httpClient, String path,
+                                  String... queryParams) {
+        var request = http()
+                .client(httpClient)
+                .send()
+                .put(path);
+        for (int i = 0; i < queryParams.length; i += 2) {
+            request = request.queryParam(queryParams[i], queryParams[i + 1]);
+        }
+        runner.$(request);
     }
 }

@@ -12,6 +12,7 @@ import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static com.consol.citrus.actions.CreateVariablesAction.Builder.createVariable;
 import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 
@@ -22,7 +23,8 @@ public class DuckUpdateTest extends DuckUpdateClient {
     @Test(description = "Проверка изменения цвета и высоты уточки")
     @CitrusTest
     public void updateColorAndHeight(@Optional @CitrusResource TestCaseRunner runner) {
-        runner.variable("duckId", "100001");
+        runner.$(createVariable("duckId", "citrus:randomNumber(10)"));
+
         runner.$(doFinally().actions(context ->
                 updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
@@ -54,7 +56,8 @@ public class DuckUpdateTest extends DuckUpdateClient {
     @Test(description = "Проверка изменения цвета и звука уточки")
     @CitrusTest
     public void updateColorAndSound(@Optional @CitrusResource TestCaseRunner runner) {
-        runner.variable("duckId", "100002");
+        runner.$(createVariable("duckId", "citrus:randomNumber(10)"));
+
         runner.$(doFinally().actions(context ->
                 updateDatabase(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 

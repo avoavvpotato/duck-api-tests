@@ -22,19 +22,9 @@ public class DuckClient extends BaseTest {
                 .validate("WINGS_STATE", wingsState));
     }
 
-    @Step("Эндпоинт для удаления уточки из базы")
-    public void deleteDuck(TestCaseRunner runner, String id) {
-        sendDeleteRequest(runner, duckService, "/api/duck/delete", "id", id);
-    }
-
     @Step("Получение id уточки из ответа")
     public void getDuckId(TestCaseRunner runner) {
         extractIdFromResponse(runner, duckService, "$.id", "duckId");
-    }
-
-    @Step("Эндпоинт для внесения уточки в базу")
-    public void createDuck(TestCaseRunner runner, Object userData) {
-        sendPostMethod(runner, "/api/duck/create", userData, duckService);
     }
 
     @Step("Валидация ответа через Payload")
@@ -55,5 +45,14 @@ public class DuckClient extends BaseTest {
     @Step("Валидация ответа из Resources без id")
     public void validateResponseResourceMessage(TestCaseRunner runner, String resourcePath) {
         validateResponseResourceMessage(runner, duckService, resourcePath);
+    }
+
+    @Step("Валидация ответа create через Payload")
+    public void validateResponsePayload(TestCaseRunner runner, Object expectedPayload) {
+        validateResponsePayloadWithId(runner, duckService, expectedPayload, "duckId");
+    }
+    @Step("Валидация ответа create через строку")
+    public void validateResponseString(TestCaseRunner runner, String expectedBody) {
+        validateResponseStringWithId(runner, duckService, expectedBody, "duckId");
     }
 }
