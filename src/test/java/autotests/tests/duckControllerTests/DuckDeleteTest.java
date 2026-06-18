@@ -12,6 +12,7 @@ import io.qameta.allure.Story;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static com.consol.citrus.actions.CreateVariablesAction.Builder.createVariable;
 import static com.consol.citrus.dsl.JsonPathSupport.jsonPath;
 
 @Epic("Тесты duck-controller")
@@ -21,7 +22,7 @@ public class DuckDeleteTest extends DuckDeleteClient {
     @Test(description = "Проверка что уточка удаляется")
     @CitrusTest
     public void deleteDuckTest(@Optional @CitrusResource TestCaseRunner runner) {
-        runner.variable("duckId", "100003");
+        runner.$(createVariable("duckId", "citrus:randomNumber(10)"));
 
         updateDatabase(runner,
                 "insert into DUCK (id, color, height, material, sound, wings_state) " +
@@ -42,5 +43,7 @@ public class DuckDeleteTest extends DuckDeleteClient {
 
         // RESOURCES
         validateResponseResourceMessage(runner, "duckDeleteTest/deleteResponse.json");
+
+        validateDuckDeletedFromDatabase(runner, "${duckId}");
     }
 }
